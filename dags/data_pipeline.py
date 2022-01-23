@@ -2,6 +2,7 @@ from datetime import timedelta
 from airflow import DAG
 from airflow.sensors.filesystem import FileSensor
 from airflow.operators.python import PythonOperator
+from airflow.providers.sqlite.operators.sqlite import SqliteOperator
 
 from datetime import datetime, timedelta
 import pandas as pd
@@ -38,5 +39,22 @@ with DAG("data_pipeline", start_date=datetime(2022,1,1),schedule_interval="@dail
     processing_trips = PythonOperator(
         task_id='processing_trips',
         python_callable=_download_trips
+    )
+
+    creating_table = SqliteOperator(
+        task_id='creating_table',
+        sqlite_conn_id='sqlite_default',
+        sql='''
+            CREATE TABLE if not exists trips (
+                trip_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                region TEXT NOT NULL,
+                origin1 NUMERIC NOT NULL,
+                origin2 NUMERIC NOT NULL,
+                destination1 NUMERIC NOT NULL,
+                destination2 NUMERIC NOT NULL,
+                datetime TEXT NOT NULL,
+                datasource TEXT NOT NULL
+            );
+            '''
     )
 
