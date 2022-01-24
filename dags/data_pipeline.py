@@ -3,6 +3,8 @@ from airflow import DAG
 from airflow.sensors.filesystem import FileSensor
 from airflow.operators.python import PythonOperator
 from airflow.providers.sqlite.operators.sqlite import SqliteOperator
+from airflow.operators.bash import BashOperator
+from airflow.operators.email import EmailOperator
 
 from datetime import datetime, timedelta
 import pandas as pd
@@ -23,7 +25,7 @@ def _download_trips():
         chunk['destination2'] = chunk['destination_coord'].str[1]
         columns = ['region','origin1','origin2','destination1','destination2','datetime','datasource']
         header = False
-        chunk.to_csv('trips_processed.csv',columns=columns,header=header, mode='a',index = False)
+        chunk.to_csv('/tmp/trips_processed.csv',columns=columns,header=header, mode='a',index = False)
         
 
 with DAG("data_pipeline", start_date=datetime(2022,1,1),schedule_interval="@daily",default_args=default_args,catchup=False) as dag:
@@ -46,7 +48,6 @@ with DAG("data_pipeline", start_date=datetime(2022,1,1),schedule_interval="@dail
         sqlite_conn_id='sqlite_default',
         sql='''
             CREATE TABLE if not exists trips (
-                trip_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 region TEXT NOT NULL,
                 origin1 NUMERIC NOT NULL,
                 origin2 NUMERIC NOT NULL,
@@ -58,3 +59,14 @@ with DAG("data_pipeline", start_date=datetime(2022,1,1),schedule_interval="@dail
             '''
     )
 
+    storing_trips = BashOperator(
+        task_id="storing_trips",
+        bash_command='echo -e ".separator ","\n.import /tmp/trips_processed.csv trips" | sqlite3 /tmp/sqlite_default.db'
+    )
+
+    send_email_notification = EmailOperator(
+        task_id="send_email_notification",
+        to="carretero140@gmail.com",
+        subject="Challenge Data Pipeline",
+        html_content="<h3>data pipeline </h3>"
+    )
