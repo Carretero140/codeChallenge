@@ -68,5 +68,7 @@ with DAG("data_pipeline", start_date=datetime(2022,1,1),schedule_interval="@dail
         task_id="send_email_notification",
         to="carretero140@gmail.com",
         subject="Challenge Data Pipeline",
-        html_content="<h3>data pipeline </h3>"
+        html_content="Data pipeline finished successfully"
     )
+
+    is_trips_file_available >> processing_trips >> creating_table >> storing_trips >> send_email_notification
