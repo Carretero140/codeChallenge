@@ -8,6 +8,7 @@ from airflow.operators.email import EmailOperator
 
 from datetime import datetime, timedelta
 import pandas as pd
+import logging
 
 default_args = {
     "owner":"airflow",
@@ -16,6 +17,7 @@ default_args = {
 }
 
 def _download_trips():
+    logging.info('Started reading data')
     for chunk in pd.read_csv('/opt/airflow/dags/files/trips.csv',chunksize=10):
         chunk['origin_coord'] = chunk['origin_coord'].map(lambda x: x.strip('POINT ()')).str.split(' ')
         chunk['origin1'] = chunk['origin_coord'].str[0]
@@ -26,6 +28,7 @@ def _download_trips():
         columns = ['region','origin1','origin2','destination1','destination2','datetime','datasource']
         header = False
         chunk.to_csv('/tmp/trips_processed.csv',columns=columns,header=header, mode='a',index = False)
+    logging.info('Finished reading data')
         
 
 with DAG("data_pipeline", start_date=datetime(2022,1,1),schedule_interval="@daily",default_args=default_args,catchup=False) as dag:
