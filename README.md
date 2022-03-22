@@ -1,5 +1,5 @@
 # codeChallenge
-This is a very simple pipeline done in airflow and containerized with docker to demonstrate data engineering skills and how an end to end process should look like.
+This is a very simple pipeline done in airflow and containerized with docker to demonstrate data engineering skills and how an end to end process should look like. 
 
 ## Requirements
 The only requirements to run this project is to have docker desktop installed.
@@ -19,7 +19,7 @@ log in with the username: airflow and password airflow
 
 Go to admin > Connections as shown in the image below:
 
-![alt text](/airflowconnections.png)
+![alt text](/airflowConnections.png)
 
 Click on the + button to add a new connection and enter the following details:
 ![alt text](/file_path.png)
@@ -29,6 +29,6 @@ Click save then create another connection:
 
 ## Running the DAG
 Go to your Dags and then trigger it via the action arrow on the far right as shown on the image:
-![alt text](/dagrun.png)
+![alt text](/dagRun.png)
 
 If you want to see details of execution of the dag you can click on it.
